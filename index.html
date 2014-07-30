@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+
+<script id="shader-fs" type="x-shader/x-fragment">
+void main(void) {
+	gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+}
+</script>
+<script id="shader-vs" type="x-shader/x-vertex">
+attribute vec3 aVertexPosition;
+
+void main(void) {
+	gl_Position = vec4(aVertexPosition, 1.0);
+}
+</script>
+
+</head>
+<body>
+	<canvas id="canvas" width="640" height="480">
+		Your browser doesn't appear to support the HTML5 <code>&lt;canvas&gt;</code> element.
+	</canvas>
+	<script>
+var canvas = document.getElementById("canvas");
+var gl = canvas.getContext("webgl");
+
+gl.clearColor(0.0,0.0,0.0,1.0);
+gl.enable(gl.DEPTH_TEST);
+gl.depthFunc(gl.LEQUAL);
+gl.clear(gl.COLOR_BUFFER_BIT);
+
+function initWebGL(){
+	var vertexShader = gl.createShader(gl.VERTEX_SHADER);
+	gl.shaderSource(vertexShader, document.getElementById("shader-vs").firstChild.textContent);
+	gl.compileShader(vertexShader);
+	var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+	gl.shaderSource(fragmentShader, document.getElementById("shader-fs").firstChild.textContent);
+	gl.compileShader(fragmentShader);
+	var shaderProgram = gl.createProgram();
+	gl.attachShader(shaderProgram,vertexShader);
+	gl.attachShader(shaderProgram,fragmentShader);
+	gl.linkProgram(shaderProgram);
+	gl.useProgram(shaderProgram);
+	
+	var vertBuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, vertBuffer);
+	var verts = [
+		0.0, 1.0, 0.0,
+		-1.0, -1.0, 0.0,
+		1.0, -1.0, 0.0
+	];
+	vertBuffer.itemSize = 3;
+	vertBuffer.numItems = 3;
+	
+	var vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
+	gl.enableVertexAttribArray(vertexPositionAttribute);
+	
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verts), gl.STATIC_DRAW);
+	
+	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+	gl.bindBuffer(gl.ARRAY_BUFFER, vertBuffer);
+	gl.vertexAttribPointer(vertexPositionAttribute, vertBuffer.itemSize, gl.FLOAT, false, 0, 0);
+	gl.drawArrays(gl.TRIANGLES, 0, vertBuffer.numItems);
+}
+
+initWebGL();
+	</script>
+</body>
+</html>
